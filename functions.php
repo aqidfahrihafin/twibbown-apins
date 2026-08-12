@@ -99,6 +99,20 @@ function slugify(string $value): string
     return trim($value, '-') ?: 'item-' . bin2hex(random_bytes(3));
 }
 
+function sanitize_rich_text(string $value): string
+{
+    $value = strip_tags(trim($value), '<p><br><strong><b><em><i><ul><ol><li>');
+    // Toolbar tidak membutuhkan atribut HTML; buang atribut hasil tempelan dari aplikasi lain.
+    $value = preg_replace('/<(p|br|strong|b|em|i|ul|ol|li)\b[^>]*>/i', '<$1>', $value) ?? $value;
+    return trim($value);
+}
+
+function render_rich_text(string $value): string
+{
+    $safe = sanitize_rich_text($value);
+    return preg_match('/<\/?(?:p|br|strong|b|em|i|ul|ol|li)\b/i', $safe) ? $safe : nl2br(e($safe));
+}
+
 function current_user(): ?array
 {
     if (session_status() !== PHP_SESSION_ACTIVE) session_start();
