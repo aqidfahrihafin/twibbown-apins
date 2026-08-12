@@ -150,6 +150,17 @@ function unique_username(PDO $pdo, string $name): string
     return $base.'-'.bin2hex(random_bytes(3));
 }
 
+function time_ago(string $datetime): string
+{
+    $seconds=max(0,time()-strtotime($datetime));
+    if($seconds<60)return 'Baru saja';
+    if($seconds<3600)return floor($seconds/60).' menit lalu';
+    if($seconds<86400)return floor($seconds/3600).' jam lalu';
+    if($seconds<604800)return floor($seconds/86400).' hari lalu';
+    if($seconds<2592000)return floor($seconds/604800).' minggu lalu';
+    return date('d M Y',strtotime($datetime));
+}
+
 function template_metrics_sql(): string
 {
     return "(SELECT COUNT(*) FROM template_likes l WHERE l.template_id=t.id) like_count,
