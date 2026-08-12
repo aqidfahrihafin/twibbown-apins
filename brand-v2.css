@@ -131,6 +131,9 @@ html,body{max-width:100%;overflow-x:clip}img,canvas,video{max-width:100%}.contai
   .footer{padding:25px 14px;font-size:12px}
   table{min-width:700px}.panel:has(table){padding:12px}.panel>div[style*="overflow-x"]{border-radius:18px}
 }
+
+/* Menjaga teks statistik tetap putih meski aturan paragraf hero dimuat sesudahnya. */
+.hero .hero-community-card p{color:#fff!important}
 @media(max-width:480px){
   .container{width:100%;padding-left:16px;padding-right:16px}
   .brand{font-size:16px}.brand-mark{width:34px;height:34px}.site-header .nav-links a{padding:11px 12px;font-size:12px}.nav-profile span:last-child{display:inline}.nav-profile{padding-right:10px!important}
