@@ -175,3 +175,5 @@ html,body{max-width:100%;overflow-x:clip}img,canvas,video{max-width:100%}.contai
   .how-panel{gap:20px;padding:25px 20px}.how-panel h2{font-size:28px;line-height:1.15}.how-panel li{gap:12px;padding:13px;margin-bottom:8px}.how-panel li>b{flex-basis:34px;width:34px;height:34px}.how-panel li span{font-size:11px}
 }
 @media(max-width:380px){.site-header .nav-links{left:10px;right:10px;padding:13px}.site-header .nav-links a{font-size:11px;padding:10px}.how-panel{padding:22px 16px}}
+
+.hero-community-card p{color:#fff}.category-symbol{position:relative}.category-symbol:before,.category-symbol:after,.category-symbol i:before,.category-symbol i:after{content:"";position:absolute;width:7px;height:7px;border:1.5px solid #0f8f83;border-radius:3px;background:#fff}.category-symbol:before{left:13px;top:13px}.category-symbol:after{right:13px;top:13px}.category-symbol i:before{left:13px;bottom:13px}.category-symbol i:after{right:13px;bottom:13px}.explore-toolbar{grid-template-columns:minmax(260px,1fr) 190px auto}@media(max-width:720px){.explore-toolbar{grid-template-columns:1fr}.explore-toolbar .btn{width:100%}}
