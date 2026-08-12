@@ -60,7 +60,8 @@ try {
         'avatar' => "VARCHAR(255) NULL AFTER bio",
         'website' => "VARCHAR(255) NOT NULL DEFAULT '' AFTER avatar",
         'is_verified' => "TINYINT(1) NOT NULL DEFAULT 0 AFTER website",
-        'status' => "ENUM('active','suspended') NOT NULL DEFAULT 'active' AFTER is_verified"
+        'status' => "ENUM('active','suspended') NOT NULL DEFAULT 'active' AFTER is_verified",
+        'google_id' => "VARCHAR(255) NULL UNIQUE AFTER status"
     ] as $column => $definition) if (!in_array($column, $userColumns, true)) $pdo->exec("ALTER TABLE users ADD {$column} {$definition}");
     $pdo->exec("UPDATE users SET username = CONCAT('creator-', id) WHERE username IS NULL OR username = ''");
 

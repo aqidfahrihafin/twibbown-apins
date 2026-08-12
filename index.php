@@ -10,7 +10,7 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
     $sharedHead = '<base href="' . htmlspecialchars($appBasePath . '/', ENT_QUOTES, 'UTF-8') . '">'
         . '<script src="https://cdn.tailwindcss.com"></script>'
         . '<script src="tailwind.config.js"></script>'
-        . '<link rel="stylesheet" href="brand-v2.css?v=20260813-3">';
+        . '<link rel="stylesheet" href="brand-v2.css?v=20260813-4">';
     $privateRoutes = ['login','register','dashboard','karya-baru','admin','users','privacy','profile','favorites','moderation','categories','notifications','social-action','metric'];
     if (in_array($route, $privateRoutes, true)) $sharedHead .= '<meta name="robots" content="noindex,nofollow">';
     if (str_starts_with($route, 't/') && (($GLOBALS['twibbon']['visibility'] ?? '') !== 'public')) $sharedHead .= '<meta name="robots" content="noindex,follow">';
@@ -51,6 +51,10 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
         $title = $m[1] === 'success' ? 'Berhasil' : 'Terjadi masalah';
         return '<div class="app-alert app-alert-' . $m[1] . '" role="alert"><span class="alert-icon">' . $icon . '</span><div><strong>' . $title . '</strong><p>' . $m[3] . '</p></div><button type="button" aria-label="Tutup notifikasi" onclick="this.parentElement.remove()">×</button></div>';
     }, $html) ?? $html;
+    if ($route === 'login') {
+        $google = '<div class="auth-divider"><span>atau</span></div><a class="google-login-btn" href="google/login"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.4a4.6 4.6 0 01-2 3v2.5h3.3c1.9-1.8 2.9-4.4 2.9-7.4z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.5c-.9.6-2.1 1-3.4 1a5.9 5.9 0 01-5.5-4.1H3.1v2.6A10 10 0 0012 22z"/><path fill="#FBBC05" d="M6.5 14a6 6 0 010-3.9V7.4H3.1a10 10 0 000 9.2L6.5 14z"/><path fill="#EA4335" d="M12 6c1.5 0 2.8.5 3.9 1.5l2.9-2.8A9.7 9.7 0 0012 2a10 10 0 00-8.9 5.4l3.4 2.7A5.9 5.9 0 0112 6z"/></svg><span>Lanjutkan dengan Google</span></a>';
+        $html = str_replace('<p class="auth-switch">', $google . '<p class="auth-switch">', $html);
+    }
     if (str_starts_with($route, 't/') && function_exists('render_rich_text')) {
         $html = preg_replace_callback('#<p class="subtitle">(.*?)</p>#s', static function(array $m): string {
             return '<div class="subtitle rich-description">' . render_rich_text(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')) . '</div>';
@@ -84,6 +88,8 @@ if (preg_match('#^article/([a-z0-9-]+)$#', $route, $match)) { $_GET['slug']=$mat
 $routes = [
     '' => 'home.php',
     'login' => 'login.php',
+    'google/login' => 'google-login.php',
+    'google/callback' => 'google-callback.php',
     'register' => 'register.php',
     'dashboard' => 'dashboard.php',
     'karya-baru' => 'karya-baru.php',
