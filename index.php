@@ -10,7 +10,7 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
     $sharedHead = '<base href="' . htmlspecialchars($appBasePath . '/', ENT_QUOTES, 'UTF-8') . '">'
         . '<script src="https://cdn.tailwindcss.com"></script>'
         . '<script src="tailwind.config.js"></script>'
-        . '<link rel="stylesheet" href="brand-v2.css?v=20260813-4">';
+        . '<link rel="stylesheet" href="brand-v2.css?v=20260813-5">';
     $privateRoutes = ['login','register','dashboard','karya-baru','admin','users','privacy','profile','favorites','moderation','categories','notifications','social-action','metric'];
     if (in_array($route, $privateRoutes, true)) $sharedHead .= '<meta name="robots" content="noindex,nofollow">';
     if (str_starts_with($route, 't/') && (($GLOBALS['twibbon']['visibility'] ?? '') !== 'public')) $sharedHead .= '<meta name="robots" content="noindex,follow">';
