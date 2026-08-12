@@ -11,7 +11,7 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
         . '<script src="https://cdn.tailwindcss.com"></script>'
         . '<script src="tailwind.config.js"></script>'
         . '<link rel="stylesheet" href="brand-v2.css?v=20260813-2">';
-    $privateRoutes = ['login','register','dashboard','admin','users','privacy','profile','favorites','moderation','categories','articles','notifications','social-action','metric'];
+    $privateRoutes = ['login','register','dashboard','karya-baru','admin','users','privacy','profile','favorites','moderation','categories','articles','notifications','social-action','metric'];
     if (in_array($route, $privateRoutes, true)) $sharedHead .= '<meta name="robots" content="noindex,nofollow">';
     if (str_starts_with($route, 't/') && (($GLOBALS['twibbon']['visibility'] ?? '') !== 'public')) $sharedHead .= '<meta name="robots" content="noindex,follow">';
     $html = str_replace(
@@ -26,6 +26,7 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
         $links = '<a' . ($route === '' ? ' class="active"' : '') . ' href="./">Beranda</a><a' . $active('explore') . ' href="explore">Jelajahi</a>';
         if ($user) {
             $links .= '<a' . $active('dashboard') . ' href="dashboard">Dashboard</a>';
+            $links .= '<a' . $active('karya-baru') . ' href="karya-baru">Buat Karya</a>';
             $links .= '<a' . $active('favorites') . ' href="favorites">Tersimpan</a>';
             if (($user['role'] ?? '') === 'admin') {
                 $links .= '<span class="mobile-menu-section">Kelola platform</span>';
@@ -79,6 +80,7 @@ $routes = [
     'login' => 'login.php',
     'register' => 'register.php',
     'dashboard' => 'dashboard.php',
+    'karya-baru' => 'karya-baru.php',
     'admin' => 'templates.php',
     'users' => 'users.php',
     'privacy' => 'privacy.php',
