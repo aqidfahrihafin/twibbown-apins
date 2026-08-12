@@ -28,9 +28,10 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
             $links .= '<a' . $active('dashboard') . ' href="dashboard">Dashboard</a>';
             $links .= '<a' . $active('favorites') . ' href="favorites">Tersimpan</a>';
             if (($user['role'] ?? '') === 'admin') {
+                $links .= '<span class="mobile-menu-section">Kelola platform</span>';
                 $links .= '<a' . $active('admin') . ' href="admin">Template Publik</a>';
-                $links .= '<a' . $active('users') . ' href="users">Pengguna</a>';
                 $links .= '<a' . $active('moderation') . ' href="moderation">Moderasi</a>';
+                $links .= '<a' . $active('users') . ' href="users">Pengguna</a>';
                 $links .= '<a' . $active('categories') . ' href="categories">Kategori</a>';
                 $links .= '<a' . $active('articles') . ' href="articles">Artikel</a>';
             } else {
@@ -38,9 +39,9 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
             }
             $initial = e(strtoupper(mb_substr((string)($user['name'] ?? 'A'), 0, 1)));
             $profileClass = $route === 'profile' ? 'nav-profile active' : 'nav-profile';
-            $links .= '<a' . $active('notifications') . ' href="notifications" aria-label="Notifikasi">Notifikasi</a><a class="' . $profileClass . '" href="profile"><span class="nav-avatar">' . $initial . '</span><span>Profil</span></a><a class="nav-logout" href="logout">Keluar</a>';
+            $links .= '<span class="mobile-menu-section">Akun</span><a' . $active('notifications') . ' href="notifications" aria-label="Notifikasi">Notifikasi</a><a class="' . $profileClass . '" href="profile"><span class="nav-avatar">' . $initial . '</span><span>Profil</span></a><a class="nav-logout" href="logout">Keluar</a>';
         } else {
-            $links .= '<a href="./#templates">Template</a><a' . $active('login') . ' href="login">Masuk</a><a' . $active('register') . ' href="register">Daftar</a>';
+            $links .= '<span class="mobile-menu-section">Akun</span><a' . $active('login') . ' href="login">Masuk</a><a class="nav-register' . ($route === 'register' ? ' active' : '') . '" href="register">Daftar gratis</a>';
         }
         $header = '<header class="site-header"><div class="container nav"><a class="brand brand-lockup" href="./"><span class="brand-mark"><i></i>S</span><span class="brand-copy"><strong>Semarakin</strong><small>by Apins Digital</small></span></a><button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mainNav" aria-label="Buka menu"><span></span><span></span><span></span></button><nav class="nav-links" id="mainNav" aria-label="Navigasi utama"><span class="mobile-menu-label">Jelajahi Semarakin</span>' . $links . '<small class="mobile-menu-brand">Kampanye kreatif, lebih mudah dibagikan.</small></nav></div></header>';
         $html = preg_replace('#<header class="site-header">.*?</header>#s', $header, $html, 1) ?? $html;
