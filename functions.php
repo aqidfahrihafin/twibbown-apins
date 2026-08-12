@@ -1,0 +1,72 @@
+<?php
+declare(strict_types=1);
+
+function e(?string $value): string
+{
+    return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+function csrf_token(): string
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    return $_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
+}
+
+function verify_csrf(): void
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    $token = $_POST['csrf_token'] ?? '';
+    if (!is_string($token) || !hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+        http_response_code(419);
+        exit('Sesi formulir berakhir. Muat ulang halaman dan coba lagi.');
+    }
+}
+
+function store_image(array $file, string $directory): string
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) throw new RuntimeException('Pilih gambar yang ingin diunggah.');
+    if (($file['size'] ?? 0) > 8 * 1024 * 1024) throw new RuntimeException('Ukuran gambar maksimal 8 MB.');
+    $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+    $extensions = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+    if (!isset($extensions[$mime]) || @getimagesize($file['tmp_name']) === false) throw new RuntimeException('Gunakan gambar JPG, PNG, atau WebP yang valid.');
+    if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) throw new RuntimeException('Folder upload tidak dapat dibuat.');
+    $name = bin2hex(random_bytes(16)) . '.' . $extensions[$mime];
+    if (!move_uploaded_file($file['tmp_name'], $directory . '/' . $name)) throw new RuntimeException('Gambar gagal disimpan. Coba kembali.');
+    return $name;
+}
+
+function flash(string $type, string $message): void
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    $_SESSION['flash'] = compact('type', 'message');
+}
+
+function pull_flash(): ?array
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    $flash = $_SESSION['flash'] ?? null;
+    unset($_SESSION['flash']);
+    return $flash;
+}
+
+function current_user(): ?array
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+    return isset($_SESSION['user']) && is_array($_SESSION['user']) ? $_SESSION['user'] : null;
+}
+
+function logged_in(): bool { return current_user() !== null; }
+function is_admin(): bool { return (current_user()['role'] ?? '') === 'admin'; }
+
+function require_login(): void
+{
+    if (!logged_in()) { flash('error', 'Silakan masuk untuk melanjutkan.'); header('Location: /twibbown/login'); exit; }
+}
+
+function require_admin(): void
+{
+    require_login();
+    if (!is_admin()) { http_response_code(403); exit('Akses hanya tersedia untuk administrator.'); }
+}
+
+function random_slug(): string { return bin2hex(random_bytes(8)); }

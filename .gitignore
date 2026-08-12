@@ -1,0 +1,19 @@
+/.env
+/.env.*
+!/.env.example
+/.idea/
+/.vscode/
+*.log
+*.tmp
+.auth-test-cookie
+.nav-test-cookie
+.menu-test-cookie
+.modal-test-cookie
+.template-test-cookie
+.edit-test-cookie
+
+# Upload pengguna dan template produksi tidak masuk source control.
+/uploads/*
+!/uploads/.gitkeep
+!/uploads/sample_template.png
+!/uploads/README.md

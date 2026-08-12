@@ -1,0 +1,44 @@
+<?php
+declare(strict_types=1);
+require __DIR__ . '/config.php';
+require __DIR__ . '/functions.php';
+$slug = trim((string)($_GET['s'] ?? ''));
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if ($slug !== '') { $stmt = $pdo->prepare('SELECT * FROM twibbons WHERE slug = ?'); $stmt->execute([$slug]); }
+elseif ($id) { $stmt = $pdo->prepare('SELECT * FROM twibbons WHERE id = ?'); $stmt->execute([$id]); }
+else { header('Location: ./'); exit; }
+$twibbon = $stmt->fetch();
+if (!$twibbon) { http_response_code(404); $title = 'Template tidak ditemukan'; require __DIR__ . '/not-found.php'; exit; }
+if ($twibbon['visibility'] === 'private') {
+    $viewer = current_user();
+    if (!$viewer || ((int)$viewer['id'] !== (int)$twibbon['owner_id'] && $viewer['role'] !== 'admin')) {
+        http_response_code(404); $title = 'Template tidak ditemukan'; require __DIR__ . '/not-found.php'; exit;
+    }
+}
+$publicBase = rtrim(getenv('APP_URL') ?: 'https://bingkaiin.apinsdigital.my.id', '/');
+$shareUrl = $publicBase . '/t/' . rawurlencode((string)$twibbon['slug']);
+$previewImage = $publicBase . '/uploads/' . rawurlencode(basename((string)$twibbon['template_image']));
+$shareDescription = trim((string)$twibbon['description']) ?: 'Gunakan template ini untuk membuat twibbon dan bagikan dukunganmu bersama Bingkaiin.';
+?>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="<?=e($shareDescription)?>"><meta property="og:type" content="website"><meta property="og:locale" content="id_ID"><meta property="og:site_name" content="Bingkaiin by Apins Digital"><meta property="og:title" content="<?=e($twibbon['title'])?> — Bingkaiin"><meta property="og:description" content="<?=e($shareDescription)?>"><meta property="og:url" content="<?=e($shareUrl)?>"><meta property="og:image" content="<?=e($previewImage)?>"><meta property="og:image:secure_url" content="<?=e($previewImage)?>"><meta property="og:image:alt" content="Preview template <?=e($twibbon['title'])?>"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="<?=e($twibbon['title'])?> — Bingkaiin"><meta name="twitter:description" content="<?=e($shareDescription)?>"><meta name="twitter:image" content="<?=e($previewImage)?>"><link rel="canonical" href="<?=e($shareUrl)?>"><title><?= e($twibbon['title']) ?> — Twibbo</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="teal.css"></head><body>
+<header class="site-header"><div class="container nav"><a class="brand" href="./"><span class="brand-mark">T</span>Twibbo</a><nav class="nav-links"><a href="./">← <span>Kembali ke</span> Beranda</a></nav></div></header>
+<main class="container"><div class="page-head"><span class="eyebrow">Editor twibbon</span><h1 class="page-title" style="margin-top:12px"><?= e($twibbon['title']) ?></h1><p class="subtitle"><?= e($twibbon['description'] ?: 'Atur fotomu sampai terlihat sempurna, lalu unduh hasilnya.') ?></p></div>
+<div class="editor-layout"><section class="panel"><div class="canvas-shell"><div class="canvas-wrap"><canvas id="canvas" aria-label="Pratinjau twibbon"></canvas></div></div><div id="emptyState" class="upload-prompt"><div class="brand-mark" style="margin:auto;width:52px;height:52px">＋</div><h2>Tambahkan fotomu</h2><p>Foto diproses langsung di perangkat dan tidak diunggah ke server.</p><label class="btn btn-primary" for="photoInput">Pilih foto<input hidden id="photoInput" type="file" accept="image/jpeg,image/png,image/webp"></label></div></section>
+<aside class="panel editor-side"><div class="step"><span class="step-num">1</span><h3>Pilih dan posisikan foto</h3></div><label class="dropzone" for="photoInput"><strong id="photoName">Pilih foto dari perangkat</strong><small>JPG, PNG, atau WebP · Maksimal 15 MB</small></label><div id="controls" hidden><div class="control"><div class="control-head"><label for="zoom">Perbesar</label><output id="zoomOut">100%</output></div><input id="zoom" type="range" min="1" max="4" value="1" step="0.01"></div><div class="control"><div class="control-head"><label for="rotation">Putar</label><output id="rotationOut">0°</output></div><input id="rotation" type="range" min="-180" max="180" value="0" step="1"></div><p class="panel-note">Seret foto langsung pada pratinjau untuk mengubah posisi. Gunakan roda mouse atau cubit untuk memperbesar.</p><div class="button-row"><button class="btn btn-secondary" id="reset" type="button">Atur ulang</button><button class="btn btn-primary" id="download" type="button">Unduh PNG</button></div></div><noscript><div class="alert alert-error">Aktifkan JavaScript untuk menggunakan editor.</div></noscript></aside></div></main>
+<footer class="footer"><div class="container">Foto Anda tetap privat dan hanya diproses di perangkat ini.</div></footer><div class="toast" id="toast" role="status"></div>
+<script>
+const canvas=document.querySelector('#canvas'),ctx=canvas.getContext('2d'),input=document.querySelector('#photoInput'),empty=document.querySelector('#emptyState'),controls=document.querySelector('#controls'),photoName=document.querySelector('#photoName'),zoom=document.querySelector('#zoom'),rotation=document.querySelector('#rotation'),zoomOut=document.querySelector('#zoomOut'),rotationOut=document.querySelector('#rotationOut'),toast=document.querySelector('#toast');
+const overlay=new Image(); overlay.src='uploads/<?= e(rawurlencode(basename($twibbon['template_image']))) ?>'; let photo=null,state={x:0,y:0,zoom:1,rotation:0,baseScale:1},drag=null,pinch=null;
+function notify(message){toast.textContent=message;toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2400)}
+function setCanvas(){canvas.width=overlay.naturalWidth||1080;canvas.height=overlay.naturalHeight||1080;draw()}
+function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#eef0f5';ctx.fillRect(0,0,canvas.width,canvas.height);if(photo){ctx.save();ctx.translate(canvas.width/2+state.x,canvas.height/2+state.y);ctx.rotate(state.rotation*Math.PI/180);const w=photo.naturalWidth*state.baseScale*state.zoom,h=photo.naturalHeight*state.baseScale*state.zoom;ctx.drawImage(photo,-w/2,-h/2,w,h);ctx.restore()}if(overlay.complete&&overlay.naturalWidth)ctx.drawImage(overlay,0,0,canvas.width,canvas.height)}
+overlay.onload=setCanvas; overlay.onerror=()=>notify('Gambar template tidak dapat dimuat.');
+function reset(){if(!photo)return;state.baseScale=Math.max(canvas.width/photo.naturalWidth,canvas.height/photo.naturalHeight);state.x=0;state.y=0;state.zoom=1;state.rotation=0;zoom.value=1;rotation.value=0;sync();draw()}
+function sync(){zoomOut.value=Math.round(state.zoom*100)+'%';rotationOut.value=Math.round(state.rotation)+'°'}
+input.addEventListener('change',()=>{const file=input.files[0];if(!file)return;if(file.size>15*1024*1024){notify('Ukuran foto maksimal 15 MB.');input.value='';return}if(!['image/jpeg','image/png','image/webp'].includes(file.type)){notify('Format foto harus JPG, PNG, atau WebP.');return}const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{photo=img;URL.revokeObjectURL(url);photoName.textContent=file.name;empty.hidden=true;controls.hidden=false;reset()};img.onerror=()=>notify('Foto tidak dapat dibaca.');img.src=url});
+zoom.addEventListener('input',()=>{state.zoom=+zoom.value;sync();draw()});rotation.addEventListener('input',()=>{state.rotation=+rotation.value;sync();draw()});document.querySelector('#reset').addEventListener('click',reset);
+function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}}
+canvas.addEventListener('pointerdown',e=>{if(!photo)return;canvas.setPointerCapture(e.pointerId);const p=point(e);drag={id:e.pointerId,x:p.x,y:p.y,sx:state.x,sy:state.y};canvas.style.cursor='grabbing'});canvas.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const p=point(e);state.x=drag.sx+p.x-drag.x;state.y=drag.sy+p.y-drag.y;draw()});function stop(){drag=null;canvas.style.cursor=photo?'grab':'default'}canvas.addEventListener('pointerup',stop);canvas.addEventListener('pointercancel',stop);canvas.style.touchAction='none';
+canvas.addEventListener('wheel',e=>{if(!photo)return;e.preventDefault();state.zoom=Math.min(4,Math.max(1,state.zoom*(e.deltaY>0?.94:1.06)));zoom.value=state.zoom;sync();draw()},{passive:false});
+document.querySelector('#download').addEventListener('click',()=>{if(!photo)return;const link=document.createElement('a');link.download='twibbon-<?= (int)$twibbon['id'] ?>-'+Date.now()+'.png';link.href=canvas.toDataURL('image/png',1);link.click();notify('Twibbon berhasil dibuat.');});
+</script></body></html>
