@@ -30,7 +30,7 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
             $links .= '<a' . $active('favorites') . ' href="favorites">Tersimpan</a>';
             if (($user['role'] ?? '') === 'admin') {
                 $links .= '<span class="mobile-menu-section">Kelola platform</span>';
-                $links .= '<a' . $active('admin') . ' href="admin">Template Publik</a>';
+                $links .= '<a' . $active('admin') . ' href="admin">Kelola Karya</a>';
                 $links .= '<a' . $active('moderation') . ' href="moderation">Moderasi</a>';
                 $links .= '<a' . $active('users') . ' href="users">Pengguna</a>';
                 $links .= '<a' . $active('categories') . ' href="categories">Kategori</a>';
