@@ -5,7 +5,7 @@ header('Content-Type: application/xml; charset=UTF-8');
 $base = rtrim(getenv('APP_URL') ?: 'https://bingkaiin.apinsdigital.my.id', '/');
 $items = $pdo->query("SELECT slug,created_at FROM twibbons WHERE visibility='public' AND moderation_status='approved' ORDER BY created_at DESC")->fetchAll();
 $creators = $pdo->query("SELECT DISTINCT u.username,u.created_at FROM users u JOIN twibbons t ON t.owner_id=u.id WHERE u.status='active' AND t.visibility='public' AND t.moderation_status='approved'")->fetchAll();
-$articles = $pdo->query("SELECT slug,updated_at FROM articles WHERE status='published'")->fetchAll();
+$articles = [];
 echo '<?xml version="1.0" encoding="UTF-8"?>';
 ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

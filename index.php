@@ -11,7 +11,7 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
         . '<script src="https://cdn.tailwindcss.com"></script>'
         . '<script src="tailwind.config.js"></script>'
         . '<link rel="stylesheet" href="brand-v2.css?v=20260813-3">';
-    $privateRoutes = ['login','register','dashboard','karya-baru','admin','users','privacy','profile','favorites','moderation','categories','articles','notifications','social-action','metric'];
+    $privateRoutes = ['login','register','dashboard','karya-baru','admin','users','privacy','profile','favorites','moderation','categories','notifications','social-action','metric'];
     if (in_array($route, $privateRoutes, true)) $sharedHead .= '<meta name="robots" content="noindex,nofollow">';
     if (str_starts_with($route, 't/') && (($GLOBALS['twibbon']['visibility'] ?? '') !== 'public')) $sharedHead .= '<meta name="robots" content="noindex,follow">';
     $html = str_replace(
@@ -32,9 +32,8 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
                 $links .= '<span class="mobile-menu-section">Kelola platform</span>';
                 $links .= '<a' . $active('admin') . ' href="admin">Kelola Karya</a>';
                 $links .= '<a' . $active('moderation') . ' href="moderation">Moderasi</a>';
-                $links .= '<a' . $active('users') . ' href="users">Pengguna</a>';
                 $links .= '<a' . $active('categories') . ' href="categories">Kategori</a>';
-                $links .= '<a' . $active('articles') . ' href="articles">Artikel</a>';
+                $links .= '<a' . $active('users') . ' href="users">Pengguna</a>';
             } else {
                 $links .= '<a' . $active('privacy') . ' href="privacy">Privasi</a>';
             }
@@ -99,7 +98,6 @@ $routes = [
     'favorites' => 'favorites.php',
     'moderation' => 'moderation.php',
     'categories' => 'categories.php',
-    'articles' => 'articles.php',
     'notifications' => 'notifications.php',
     'metric' => 'metric.php',
 ];
