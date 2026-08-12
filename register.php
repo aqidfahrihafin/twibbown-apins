@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (strlen($password)<8) throw new RuntimeException('Password minimal 8 karakter.');
         if ($password !== ($_POST['password_confirmation']??'')) throw new RuntimeException('Konfirmasi password tidak sama.');
         $role='user';
-        $stmt=$pdo->prepare('INSERT INTO users(name,email,password,role) VALUES(?,?,?,?)'); $stmt->execute([$name,$email,password_hash($password,PASSWORD_DEFAULT),$role]);
+        $username=unique_username($pdo,$name);$stmt=$pdo->prepare('INSERT INTO users(name,username,email,password,role) VALUES(?,?,?,?,?)'); $stmt->execute([$name,$username,$email,password_hash($password,PASSWORD_DEFAULT),$role]);
         session_regenerate_id(true); $_SESSION['user']=['id'=>(int)$pdo->lastInsertId(),'name'=>$name,'email'=>$email,'role'=>$role];
         flash('success','Akun berhasil dibuat.'); header('Location: dashboard'); exit;
     } catch(PDOException $e){$error=$e->getCode()==='23000'?'Email sudah terdaftar.':'Pendaftaran gagal. Coba kembali.';} catch(Throwable $e){$error=$e->getMessage();}

@@ -92,3 +92,26 @@ function require_admin(): void
 }
 
 function random_slug(): string { return bin2hex(random_bytes(8)); }
+
+function compact_number(int $number): string
+{
+    if ($number >= 1000000) return rtrim(rtrim(number_format($number / 1000000, 1), '0'), '.') . ' jt';
+    if ($number >= 1000) return rtrim(rtrim(number_format($number / 1000, 1), '0'), '.') . ' rb';
+    return (string)$number;
+}
+
+function unique_username(PDO $pdo, string $name): string
+{
+    $base = strtolower(trim((string)preg_replace('/[^a-zA-Z0-9]+/', '-', $name), '-')) ?: 'creator';
+    $candidate=$base;$i=1;$stmt=$pdo->prepare('SELECT COUNT(*) FROM users WHERE username=?');
+    do{$stmt->execute([$candidate]);if(!(int)$stmt->fetchColumn())return $candidate;$candidate=$base.'-'.$i++;}while($i<1000);
+    return $base.'-'.bin2hex(random_bytes(3));
+}
+
+function template_metrics_sql(): string
+{
+    return "(SELECT COUNT(*) FROM template_likes l WHERE l.template_id=t.id) like_count,
+      (SELECT COUNT(*) FROM template_favorites f WHERE f.template_id=t.id) favorite_count,
+      (SELECT COALESCE(AVG(r.rating),0) FROM template_ratings r WHERE r.template_id=t.id) rating_avg,
+      (SELECT COUNT(*) FROM template_ratings r WHERE r.template_id=t.id) rating_count";
+}
