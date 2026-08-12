@@ -15,8 +15,8 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
     if (in_array($route, $privateRoutes, true)) $sharedHead .= '<meta name="robots" content="noindex,nofollow">';
     if (str_starts_with($route, 't/') && (($GLOBALS['twibbon']['visibility'] ?? '') !== 'public')) $sharedHead .= '<meta name="robots" content="noindex,follow">';
     $html = str_replace(
-        ['Bingkaiinn','Bingkaiin','Twibbo','<span class="brand-mark">T</span>','<span class="brand-mark">B</span>','href="home.php"','href="login.php"','href="register.php"','href="dashboard.php"','href="admin.php"','href="logout.php"'],
-        ['Semarakin','Semarakin','Semarakin','<span class="brand-mark">S</span>','<span class="brand-mark">S</span>','href="./"','href="login"','href="register"','href="dashboard"','href="admin"','href="logout"'],
+        ['Bingkaiinn','Bingkaiin','Twibbo','Kelola Karya','Kelola karya','<span class="brand-mark">T</span>','<span class="brand-mark">B</span>','href="home.php"','href="login.php"','href="register.php"','href="dashboard.php"','href="admin.php"','href="logout.php"'],
+        ['Semarakin','Semarakin','Semarakin','Semua Karya','Semua karya','<span class="brand-mark">S</span>','<span class="brand-mark">S</span>','href="./"','href="login"','href="register"','href="dashboard"','href="admin"','href="logout"'],
         $html
     );
     $html = preg_replace('#create\.php\?s=([a-zA-Z0-9-]+)#', 't/$1', $html) ?? $html;
@@ -25,12 +25,12 @@ ob_start(static function (string $html) use ($route, $appBasePath): string {
         $active = static fn(string $name): string => $route === $name ? ' class="active"' : '';
         $links = '<a' . ($route === '' ? ' class="active"' : '') . ' href="./">Beranda</a><a' . $active('explore') . ' href="explore">Jelajahi</a>';
         if ($user) {
-            $links .= '<a' . $active('dashboard') . ' href="dashboard">Dashboard</a>';
-            $links .= '<a' . $active('karya-baru') . ' href="karya-baru">Buat Karya</a>';
+            $workActive = in_array($route, ['dashboard','karya-baru'], true) ? ' class="active"' : '';
+            $links .= '<a' . $workActive . ' href="dashboard">Karya Saya</a>';
             $links .= '<a' . $active('favorites') . ' href="favorites">Tersimpan</a>';
             if (($user['role'] ?? '') === 'admin') {
                 $links .= '<span class="mobile-menu-section">Kelola platform</span>';
-                $links .= '<a' . $active('admin') . ' href="admin">Kelola Karya</a>';
+                $links .= '<a' . $active('admin') . ' href="admin">Semua Karya</a>';
                 $links .= '<a' . $active('moderation') . ' href="moderation">Moderasi</a>';
                 $links .= '<a' . $active('categories') . ' href="categories">Kategori</a>';
                 $links .= '<a' . $active('users') . ' href="users">Pengguna</a>';
