@@ -71,6 +71,34 @@ function pull_flash(): ?array
     return $flash;
 }
 
+// Alias konsisten untuk halaman baru dan halaman lama.
+function set_flash(string $type, string $message): void
+{
+    flash($type, $message);
+}
+
+function get_flash(): ?array
+{
+    return pull_flash();
+}
+
+function redirect(string $route): never
+{
+    header('Location: ' . route_url($route));
+    exit;
+}
+
+function slugify(string $value): string
+{
+    $value = trim($value);
+    if (function_exists('iconv')) {
+        $converted = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
+        if ($converted !== false) $value = $converted;
+    }
+    $value = strtolower((string) preg_replace('/[^a-zA-Z0-9]+/', '-', $value));
+    return trim($value, '-') ?: 'item-' . bin2hex(random_bytes(3));
+}
+
 function current_user(): ?array
 {
     if (session_status() !== PHP_SESSION_ACTIVE) session_start();
