@@ -1,6 +1,28 @@
 <?php
 declare(strict_types=1);
 
+// Shared hosting tidak selalu menyediakan ekstensi mbstring.
+if (!function_exists('mb_strlen')) {
+    function mb_strlen(string $value, ?string $encoding = null): int
+    {
+        return preg_match_all('/./us', $value, $matches) ?: 0;
+    }
+}
+if (!function_exists('mb_substr')) {
+    function mb_substr(string $value, int $start, ?int $length = null, ?string $encoding = null): string
+    {
+        preg_match_all('/./us', $value, $matches);
+        return implode('', array_slice($matches[0] ?? [], $start, $length));
+    }
+}
+
+function route_url(string $route = ''): string
+{
+    $script = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '/index.php');
+    $base = rtrim(dirname($script), '/.');
+    return ($base === '' ? '' : $base) . '/' . ltrim($route, '/');
+}
+
 function e(?string $value): string
 {
     return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -60,7 +82,7 @@ function is_admin(): bool { return (current_user()['role'] ?? '') === 'admin'; }
 
 function require_login(): void
 {
-    if (!logged_in()) { flash('error', 'Silakan masuk untuk melanjutkan.'); header('Location: /twibbown/login'); exit; }
+    if (!logged_in()) { flash('error', 'Silakan masuk untuk melanjutkan.'); header('Location: ' . route_url('login')); exit; }
 }
 
 function require_admin(): void
